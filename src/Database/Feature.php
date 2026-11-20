@@ -9,18 +9,25 @@ namespace Cycle\Testing\Database;
  */
 enum Feature
 {
-    /** `INSERT … RETURNING` (SQLServer: `OUTPUT`). */
+    /**
+     * `INSERT … RETURNING` (SQLServer: `OUTPUT`).
+     */
     case Returning;
-
     case FullJoin;
 
-    /** `SELECT … FOR UPDATE` (SQLServer: `WITH (UPDLOCK)`). */
+    /**
+     * `SELECT … FOR UPDATE` (SQLServer: `WITH (UPDLOCK)`).
+     */
     case ForUpdate;
 
-    /** Several schemas in one database (`schema.table`). */
+    /**
+     * Several schemas in one database (`schema.table`).
+     */
     case Schemas;
 
-    /** DDL inside a transaction is rolled back with it; MySQL and SQLServer commit DDL implicitly. */
+    /**
+     * DDL inside a transaction is rolled back with it; MySQL and SQLServer commit DDL implicitly.
+     */
     case TransactionalDdl;
 
     /**
