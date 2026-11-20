@@ -1,0 +1,24 @@
+# Line-ending normalization for text files.
+* text=auto
+
+# PHP-aware hunk headers in `git diff`.
+*.php diff=php
+
+# List-like manifests: concurrent additions to the same list merge instead of conflicting.
+/composer.json merge=union
+
+# Default: nothing goes into the dist archive. Re-include only what the installed package needs.
+* export-ignore
+
+# Manifest and top-level documentation.
+/composer.json   -export-ignore
+/LICENSE.md      -export-ignore
+/README.md       -export-ignore
+
+# Autoloaded source code, the shared docker setup and the shipped agent skills.
+/src             -export-ignore
+/src/**          -export-ignore
+/resources       -export-ignore
+/resources/**    -export-ignore
+/skills          -export-ignore
+/skills/**       -export-ignore
