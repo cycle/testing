@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   testo:
-    uses: cycle/gh-actions/.github/workflows/testo.yml@feat/testo-workflow
+    uses: cycle/gh-actions/.github/workflows/testo.yml@master
     with:
       coverage: true
     secrets: inherit
