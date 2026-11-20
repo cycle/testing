@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\Testing\Tests\Acceptance\Common;
 
-use Cycle\Testing\Database\DatabasePlugin;
+use Cycle\Testing\Config;
 use Cycle\Testing\Database\DatabaseTestCase;
 use Cycle\Testing\Database\Internal\Current;
 use Cycle\Testing\ORM\OrmPlugin;
-use Cycle\Testing\Regression\CaseGenerator;
-use Cycle\Testing\Regression\TemplateSet;
+use Cycle\Testing\Regression\Command;
 use Testo\Application\Application;
-use Testo\Application\Config\ApplicationConfig;
-use Testo\Application\Config\FinderConfig;
-use Testo\Application\Config\SuiteConfig;
 use Testo\Assert;
 use Testo\Core\Context\TestResult;
 use Testo\Core\Value\Status;
@@ -68,21 +64,29 @@ final class CaseTemplatesTest extends DatabaseTestCase
         \rmdir($dir);
     }
 
+    /**
+     * The way a user adds a case: `cycle-testing new-case`, then a `testo.php` with a regression suite.
+     */
     private function assertGeneratedCasePasses(string $template): void
     {
         $this->dir = \sys_get_temp_dir() . '/cycle-testing-case-' . \bin2hex(\random_bytes(4));
         # A fresh namespace per run: the classes of a generated case stay loaded for the rest of the process.
-        $namespace = 'Cycle\Testing\Tests\Generated\Run' . \bin2hex(\random_bytes(4)) . '\Issue1';
-        $files = (new CaseGenerator())->generate(TemplateSet::load($template), "{$this->dir}/Issue1", $namespace);
-        Assert::notBlank($files);
+        $namespace = 'Cycle\Testing\Tests\Generated\Run' . \bin2hex(\random_bytes(4));
+        $output = \fopen('php://memory', 'w+');
+
+        $code = (new Command($this->dir, $output, $output))
+            ->run(['new-case', '1', "--template={$template}", "--namespace={$namespace}"]);
+
+        \rewind($output);
+        Assert::string((string) \stream_get_contents($output))->startsWith('Created tests/Regression/Issue1 ');
+        Assert::same($code, 0);
 
         $outer = Current::$pool;
         try {
-            $result = Application::createFromConfig(new ApplicationConfig(suites: [new SuiteConfig(
-                name: 'Generated',
-                location: new FinderConfig(["{$this->dir}/Issue1"]),
-                plugins: [new DatabasePlugin($this->driver), new OrmPlugin()],
-            )]))->run();
+            $config = Config::forPackage('cycle/generated', src: [], root: $this->dir)
+                ->regression('tests/Regression', drivers: [$this->driver], plugins: [new OrmPlugin()])
+                ->build();
+            $result = Application::createFromConfig($config)->run();
         } finally {
             # The nested suite clears the static the outer suite's assertions read.
             Current::$pool = $outer;
