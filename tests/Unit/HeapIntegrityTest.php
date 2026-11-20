@@ -8,6 +8,7 @@ use Cycle\ORM\EntityManager;
 use Cycle\Testing\Database\Schema\TableBuilder;
 use Cycle\Testing\ORM\HeapIntegrity;
 use Cycle\Testing\ORM\Memory;
+use Cycle\Testing\Tests\Fixtures\TypedEntity;
 use Cycle\Testing\Tests\Fixtures\User;
 use Cycle\Testing\Tests\Fixtures\UserSchema;
 use Testo\Assert;
@@ -30,6 +31,15 @@ final class HeapIntegrityTest
         $user->email = 'changed@example.com';
 
         Assert::same(HeapIntegrity::violations($orm), ['Entity and State are not in sync `user`.`email`']);
+    }
+
+    public function uninitializedTypedPropertiesAreSkipped(): void
+    {
+        $orm = Memory::orm(TypedEntity::schema());
+        $entity = $orm->make('typed');
+        Assert::false((new \ReflectionProperty(TypedEntity::class, 'id'))->isInitialized($entity));
+
+        Assert::same(HeapIntegrity::violations($orm), []);
     }
 
     /**
