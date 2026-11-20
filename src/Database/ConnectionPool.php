@@ -22,14 +22,14 @@ use Psr\Log\LoggerAwareInterface;
  */
 final class ConnectionPool
 {
+    public readonly Layout $layout;
+    public readonly Env $env;
+
     /** @var array<string, DriverInterface> */
     private array $drivers = [];
 
     /** @var array<string, DatabaseManager> */
     private array $managers = [];
-
-    public readonly Layout $layout;
-    public readonly Env $env;
 
     public function __construct(
         public readonly Driver $driver,

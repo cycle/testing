@@ -144,6 +144,20 @@ final class DatabaseInterceptor implements TestSuiteRunInterceptor, TestCaseRunI
         }
     }
 
+    /**
+     * @return list<DriverInterface> The distinct connections behind the layout's databases.
+     */
+    private static function connections(DatabaseContext $context): array
+    {
+        $drivers = [];
+        foreach ($context->pool->layout->names() as $name) {
+            $driver = $context->database($name)->getDriver();
+            $drivers[\spl_object_id($driver)] = $driver;
+        }
+
+        return \array_values($drivers);
+    }
+
     private function probe(): ?string
     {
         try {
@@ -173,20 +187,6 @@ final class DatabaseInterceptor implements TestSuiteRunInterceptor, TestCaseRunI
         }
     }
 
-    /**
-     * @return list<DriverInterface> The distinct connections behind the layout's databases.
-     */
-    private static function connections(DatabaseContext $context): array
-    {
-        $drivers = [];
-        foreach ($context->pool->layout->names() as $name) {
-            $driver = $context->database($name)->getDriver();
-            $drivers[\spl_object_id($driver)] = $driver;
-        }
-
-        return \array_values($drivers);
-    }
-
     private function rollbackAll(): void
     {
         foreach ($this->pool->drivers() as $driver) {
@@ -208,5 +208,4 @@ final class DatabaseInterceptor implements TestSuiteRunInterceptor, TestCaseRunI
 
         return $attributes === [] ? $this->isolation : $attributes[0]->newInstance()->mode;
     }
-
 }

@@ -260,6 +260,15 @@ final class Config
     }
 
     /**
+     * @param iterable<PluginConfigurator> $plugins
+     * @return list<PluginConfigurator>
+     */
+    private static function list(iterable $plugins): array
+    {
+        return \is_array($plugins) ? \array_values($plugins) : \iterator_to_array($plugins, false);
+    }
+
+    /**
      * Without the plugin, Mockery expectations would go unverified silently.
      *
      * @return list<PluginConfigurator>
@@ -267,15 +276,6 @@ final class Config
     private function mockery(): array
     {
         return \class_exists(MockeryPlugin::class) && \class_exists(\Mockery::class) ? [new MockeryPlugin()] : [];
-    }
-
-    /**
-     * @param iterable<PluginConfigurator> $plugins
-     * @return list<PluginConfigurator>
-     */
-    private static function list(iterable $plugins): array
-    {
-        return \is_array($plugins) ? \array_values($plugins) : \iterator_to_array($plugins, false);
     }
 
     /**

@@ -9,9 +9,9 @@ use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
+use Cycle\ORM\Options;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Options;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
