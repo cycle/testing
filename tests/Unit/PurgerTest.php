@@ -6,6 +6,7 @@ namespace Cycle\Testing\Tests\Unit;
 
 use Cycle\Database\Database;
 use Cycle\Testing\Database\Memory;
+use Cycle\Testing\Database\Mock\StubDriver;
 use Cycle\Testing\Database\QueryLog;
 use Cycle\Testing\Database\Schema\Purger;
 use Cycle\Testing\Database\Schema\TableBuilder;
@@ -49,6 +50,15 @@ final class PurgerTest
         $run = $log->capture(static fn() => Purger::dropTables($database->getDriver()));
 
         Assert::count($run['queries'], 1);
+    }
+
+    public function dropTablesOfAnotherDriverFallsBackToDropAll(): void
+    {
+        $database = self::referencedRows(new Database('default', '', StubDriver::make()));
+
+        Purger::dropTables($database->getDriver());
+
+        Assert::same($database->getTables(), []);
     }
 
     /**
