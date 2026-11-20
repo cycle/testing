@@ -10,6 +10,7 @@ use Cycle\Testing\Database\DatabaseContext;
 use Cycle\Testing\ORM\Attribute\SkipHeapCheck;
 use Cycle\Testing\ORM\HeapIntegrity;
 use Cycle\Testing\ORM\OrmAware;
+use Testo\Assert;
 use Testo\Common\Reflection;
 use Testo\Core\Context\TestInfo;
 use Testo\Core\Context\TestResult;
@@ -63,8 +64,15 @@ final class OrmInterceptor implements TestRunInterceptor
             }
 
             $violations = HeapIntegrity::violations($instance instanceof OrmAware ? $instance->currentOrm() : $orm);
+            if ($violations === []) {
+                # Counts as the test's assertion, like PHPUnit's assertClearState() in tearDown: a test that only
+                # saves and loads is not Risky. The collector is still open here, inside the assertion interceptors.
+                Assert::same($violations, [], 'ORM heap is in sync with the database');
 
-            return $violations === [] ? $result : new TestResult(
+                return $result;
+            }
+
+            return new TestResult(
                 $info,
                 Status::Failed,
                 failure: new HeapIntegrityException(\implode("\n", $violations)),
