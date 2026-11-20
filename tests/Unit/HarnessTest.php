@@ -80,6 +80,22 @@ final class HarnessTest
         self::assertAllPassed($results);
     }
 
+    public function inlineTestsRunInADriverSuite(): void
+    {
+        $results = self::run(['Fixtures/HarnessSuite/Inline'], [new DatabasePlugin(Driver::SQLite)]);
+
+        self::assertAllPassed($results);
+        Assert::count($results, 1);
+    }
+
+    public function ormPluginWithoutADatabaseLeavesTestsAlone(): void
+    {
+        $results = self::run(['Fixtures/HarnessSuite/Functions'], [new OrmPlugin()]);
+
+        self::assertAllPassed($results);
+        Assert::count($results, 1);
+    }
+
     public function queriesGoToTheQuerySqlChannel(): void
     {
         $results = self::run(['Fixtures/HarnessSuite/Memory'], [new DatabasePlugin(Driver::SQLite)]);
