@@ -70,6 +70,7 @@ final class DatabaseContextTest extends DatabaseTestCase
         $schema = $this->schema('child');
         Assert::true($schema->exists());
         Assert::true($schema->hasForeignKey(['parent_id']));
+        Assert::true($schema->hasIndex(['note']));
         SchemaAssert::sameAsInDb($schema);
     }
 

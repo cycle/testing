@@ -53,6 +53,33 @@ final class TableBuilderTest
         Assert::same($db->getTables(), []);
     }
 
+    public function foreignKeyFromAnotherColumnWithItsRules(): void
+    {
+        $db = Memory::database();
+        $builder = new TableBuilder($db);
+        $builder->makeTable('parent', ['id' => 'primary']);
+        $builder->makeTable('child', ['id' => 'primary', 'parent_id' => 'integer, nullable'], fk: [
+            ['table' => 'parent', 'column' => 'id', 'from' => 'parent_id', 'onDelete' => 'SET NULL', 'onUpdate' => 'NO ACTION'],
+        ]);
+
+        $key = $db->table('child')->getSchema()->foreignKey(['parent_id']);
+        Assert::same($key->getDeleteRule(), 'SET NULL');
+        Assert::same($key->getUpdateRule(), 'NO ACTION');
+    }
+
+    public function makeFkAddsAKeyToAnExistingTable(): void
+    {
+        $db = Memory::database();
+        $builder = new TableBuilder($db);
+        $builder->makeTable('parent', ['id' => 'primary']);
+        $builder->makeTable('child', ['id' => 'primary', 'parent_id' => 'integer']);
+
+        $builder->makeFK('child', 'parent_id', 'parent', 'id', onDelete: 'NO ACTION');
+
+        Assert::true($db->table('child')->getSchema()->hasForeignKey(['parent_id']));
+        Assert::same($db->table('child')->getSchema()->foreignKey(['parent_id'])->getDeleteRule(), 'NO ACTION');
+    }
+
     public function invalidTypeFails(): never
     {
         Expect::exception(SchemaException::class);
