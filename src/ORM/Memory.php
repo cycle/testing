@@ -23,6 +23,6 @@ final class Memory
         ?Layout $layout = null,
         ?callable $factory = null,
     ): ORMInterface {
-        return ($factory ?? new OrmFactory())(DatabaseMemory::manager($layout), SchemaSource::of($schema)->resolve());
+        return ($factory ?? new OrmFactory())(DatabaseMemory::manager($layout), SchemaSource::of($schema)->resolve($layout));
     }
 }
