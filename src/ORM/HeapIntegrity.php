@@ -39,7 +39,7 @@ final class HeapIntegrity
             \array_push($violations, ...self::entityViolations(
                 $orm,
                 $node->getRole(),
-                $orm->getMapper($entity)->extract($entity),
+                self::extract($orm, $entity),
                 $node->getData(),
                 $relations->getValue($node),
             ));
@@ -108,6 +108,35 @@ final class HeapIntegrity
         }
 
         return $violations;
+    }
+
+    /**
+     * The mapper's extract, or, when it reads a typed property that is still uninitialized (an entity from
+     * `make()` under a reflection hydrator), the initialized properties only: the ORM's own mapper skips
+     * those too, so they hold nothing to compare.
+     *
+     * @return array<string, mixed>
+     */
+    private static function extract(ORMInterface $orm, object $entity): array
+    {
+        try {
+            return $orm->getMapper($entity)->extract($entity);
+        } catch (\Error $e) {
+            \str_contains($e->getMessage(), 'before initialization') or throw $e;
+        }
+
+        $values = [];
+        for ($class = new \ReflectionObject($entity); $class !== false; $class = $class->getParentClass()) {
+            foreach ($class->getProperties() as $property) {
+                $name = $property->getName();
+                if ($property->isStatic() || \array_key_exists($name, $values) || !$property->isInitialized($entity)) {
+                    continue;
+                }
+                $values[$name] = $property->getValue($entity);
+            }
+        }
+
+        return $values;
     }
 
     private static function findRelation(ORMInterface $orm, string $role, string $name): ?array
