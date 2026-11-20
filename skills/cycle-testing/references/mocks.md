@@ -42,3 +42,11 @@ in-memory SQLite.
 `Config` registers `Testo\Bridge\Mockery\MockeryPlugin` in every suite when `testo/bridge-mockery` is
 installed: expectations are verified after each test and count as assertions. Without the plugin they go
 unverified. Load `testo-test-doubles` for the details.
+
+## PSR-11 container
+
+`Container\SimpleContainer(array $definitions = [], ?\Closure $factory = null)` serves code that wants a
+`ContainerInterface`, e.g. `new EventDrivenCommandGenerator($schema, new SimpleContainer())`. No autowiring:
+`get()` returns the definition, else the factory's result (memoised), else throws
+`NotFoundExceptionInterface`; `has()` is true when `get()` would succeed, so it may call the factory. It
+replaces the repo copies in `tests/*/Utils/SimpleContainer.php`.

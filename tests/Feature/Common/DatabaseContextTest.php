@@ -29,6 +29,11 @@ final class DatabaseContextTest extends DatabaseTestCase
         Assert::notSame($this->serverVersion(), '');
     }
 
+    public function driverIsNamedLikeItsConnection(): void
+    {
+        Assert::same($this->database->getDriver()->getName(), 'default');
+    }
+
     public function sqlAssertUsesDriverQuotes(): void
     {
         SqlAssert::same(

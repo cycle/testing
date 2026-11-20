@@ -127,5 +127,6 @@ method with `#[Isolate(Isolation::Transaction)]` or `#[Isolate(Isolation::None)]
   `Config`, env vars.
 - [references/isolation.md](references/isolation.md) — modes, ordering against hooks, seeding once per suite.
 - [references/orm.md](references/orm.md) — `OrmTestCase`, `OrmPlugin`, the heap check, compiled schemas.
-- [references/mocks.md](references/mocks.md) — wrap drivers, `StubDriver`, `FakePDO`, Mockery, in-memory helpers.
+- [references/mocks.md](references/mocks.md) — wrap drivers, `StubDriver`, `FakePDO`, Mockery, in-memory helpers,
+  `SimpleContainer` (PSR-11).
 - [references/migrate-from-phpunit.md](references/migrate-from-phpunit.md) — porting a PHPUnit suite with per-driver stubs.

@@ -32,6 +32,7 @@ use Testo\Pipeline\Middleware\TestRunInterceptor;
 final class OrmInterceptor implements TestRunInterceptor
 {
     /**
+     * @param \Closure(\Cycle\Testing\Database\Layout): SchemaInterface $schema
      * @param \Closure(\Cycle\Database\DatabaseProviderInterface, SchemaInterface): ORMInterface $factory
      * @param \Closure(ORMInterface, DatabaseContext): (callable(): void|null)|null $bind
      */
@@ -49,7 +50,7 @@ final class OrmInterceptor implements TestRunInterceptor
             return $next($info);
         }
 
-        $orm = ($this->factory)($context->dbal(), ($this->schema)());
+        $orm = ($this->factory)($context->dbal(), ($this->schema)($context->pool->layout));
         $instance = $info->caseInfo->instance?->getInstance();
         $instance instanceof OrmAware and $instance->attachOrm($orm);
         $unbind = $this->bind === null ? null : ($this->bind)($orm, $context);
