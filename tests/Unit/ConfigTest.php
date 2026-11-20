@@ -68,7 +68,7 @@ final class ConfigTest
     public function driverWithoutFoldersGetsNoSuite(): void
     {
         $config = Config::forPackage('cycle/testing', root: \dirname(__DIR__, 2))
-            ->feature('tests/Feature', drivers: [Driver::Postgres], common: 'NoSuchFolder')
+            ->feature('tests/Feature', drivers: [Driver::MySQL], common: 'NoSuchFolder')
             ->unit('tests/Unit')
             ->build();
 

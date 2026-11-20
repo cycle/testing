@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\Testing\Database\Internal;
 
-use Cycle\Database\Database;
 use Cycle\Database\Driver\DriverInterface;
+use Cycle\Database\Driver\Postgres\PostgresDriver;
 use Cycle\Testing\Database\Attribute\Isolate;
 use Cycle\Testing\Database\Attribute\WrapDriver;
 use Cycle\Testing\Database\ConnectionPool;
@@ -183,7 +183,12 @@ final class DatabaseInterceptor implements TestSuiteRunInterceptor, TestCaseRunI
     {
         $this->rollbackAll();
         foreach (self::connections(new DatabaseContext($this->pool->driver, $this->pool)) as $driver) {
-            Purger::dropAll(new Database('purge', '', $driver));
+            Purger::dropTables($driver);
+        }
+
+        # Variants from `db()` share the server, so their caches of the dropped tables are stale too.
+        foreach ($this->pool->drivers() as $driver) {
+            $driver instanceof PostgresDriver and $driver->resetPrimaryKeys();
         }
     }
 
