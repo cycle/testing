@@ -47,7 +47,7 @@ final class DatabasePlugin implements PluginConfigurator
     public function configure(Container $container): void
     {
         $env = $this->env ?? Env::load();
-        $pool = new ConnectionPool($this->driver, $this->layout, $env, new QueryLog(echo: $env->debug()));
+        $pool = new ConnectionPool($this->driver, $this->layout, $env);
         $container->set($pool);
 
         $collector = $container->get(InterceptorCollector::class);

@@ -55,7 +55,8 @@ DB_DRIVERS=sqlite vendor/bin/testo                            # register only th
 A driver whose server is down is checked once per suite and its tests are reported **skipped**. CI sets
 `DB_REQUIRED=1`, which turns that into a failure. Ports, credentials and images come from
 `vendor/cycle/testing/resources/docker/.env`; any exported `DB_*` variable overrides them. Add `--json` when
-you parse the result.
+you parse the result. A test's SQL is in the `query.sql` channel: printed with a failed test's output, and for
+every test in the HTML report (`--log-html`).
 
 ## Writing a database test
 

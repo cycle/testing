@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
  * a read, except Postgres catalog introspection, which the driver runs on its own.
  *
  * Messages are forwarded to {@see self::forwardTo()} (the Testo `query.sql` channel, which attaches them to
- * the running test's report) and, in debug mode, echoed to stdout.
+ * the running test's report).
  */
 final class QueryLog extends AbstractLogger
 {
@@ -29,25 +29,15 @@ final class QueryLog extends AbstractLogger
 
     private ?LoggerInterface $forward = null;
 
-    public function __construct(
-        private bool $echo = false,
-    ) {}
-
     public function forwardTo(?LoggerInterface $logger): void
     {
         $this->forward = $logger;
-    }
-
-    public function echo(bool $echo = true): void
-    {
-        $this->echo = $echo;
     }
 
     public function log($level, string|\Stringable $message, array $context = []): void
     {
         $message = (string) $message;
         $this->forward?->log($level, $message . "\n", $context);
-        $this->echo and print " > {$message}\n";
 
         if (empty($context['elapsed'])) {
             return;
