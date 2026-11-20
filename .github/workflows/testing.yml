@@ -20,6 +20,4 @@ jobs:
     uses: cycle/gh-actions/.github/workflows/testo.yml@feat/testo-workflow
     with:
       coverage: true
-      # cycle/testing requires cycle/database, which requires cycle/testing back in its dev dependencies.
-      composer-root-version: 1.x-dev
     secrets: inherit
