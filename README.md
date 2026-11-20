@@ -18,6 +18,7 @@
 [![Psalm Level](https://shepherd.dev/github/cycle/testing/level.svg)](https://shepherd.dev/github/cycle/testing)
 [![Type Coverage](https://shepherd.dev/github/cycle/testing/coverage.svg)](https://shepherd.dev/github/cycle/testing)
 [![Codecov](https://img.shields.io/codecov/c/github/cycle/testing/1.x?style=flat-square&logo=codecov)](https://app.codecov.io/gh/cycle/testing/tree/1.x)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcycle%2Ftesting%2F1.x)](https://dashboard.stryker-mutator.io/reports/github.com/cycle/testing/1.x)
 
 </div>
 
