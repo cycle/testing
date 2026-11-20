@@ -30,6 +30,24 @@ final class QueryLogTest
         Assert::same($log->countReads() + $log->countWrites(), 0);
     }
 
+    public function marksCountFromThemOn(): void
+    {
+        $log = new QueryLog();
+        $log->info('SELECT 1', ['elapsed' => 0.1]);
+        $log->info('DELETE FROM t', ['elapsed' => 0.1]);
+        Assert::same([$log->readsSinceMark(), $log->writesSinceMark()], [1, 1]);
+
+        $log->markReads();
+        $log->markWrites();
+        $log->info('SELECT 2', ['elapsed' => 0.1]);
+        Assert::same([$log->readsSinceMark(), $log->writesSinceMark()], [1, 0]);
+        Assert::same($log->countReads(), 2);
+
+        $log->reset();
+        $log->info('UPDATE t SET a = 1', ['elapsed' => 0.1]);
+        Assert::same([$log->readsSinceMark(), $log->writesSinceMark()], [0, 1]);
+    }
+
     public function captureReportsTheDifference(): void
     {
         $log = new QueryLog();

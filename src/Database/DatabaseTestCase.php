@@ -14,6 +14,8 @@ use Cycle\Testing\Database\Mock\SQLiteWrapDriver;
 use Cycle\Testing\Database\Mock\SQLServerWrapDriver;
 use Cycle\Testing\Database\Mock\WrapDriverInterface;
 use Cycle\Testing\Database\Schema\TableTrait;
+use Testo\Assert;
+use Testo\Common\Attribute\AssertMethod;
 
 /**
  * Base for tests that run in a per-driver suite (`Feature/<Driver>` and the like).
@@ -93,6 +95,36 @@ abstract class DatabaseTestCase implements DatabaseAware
 
         /** @var SQLiteWrapDriver|MySQLWrapDriver|PostgresWrapDriver|SQLServerWrapDriver */
         return $driver;
+    }
+
+    /**
+     * Start counting reads for {@see self::assertNumReads()}; without it, they count from the test's start.
+     */
+    protected function captureReadQueries(): void
+    {
+        $this->context->queryLog()->markReads();
+    }
+
+    /**
+     * Start counting writes for {@see self::assertNumWrites()}; without it, they count from the test's start.
+     */
+    protected function captureWriteQueries(): void
+    {
+        $this->context->queryLog()->markWrites();
+    }
+
+    #[AssertMethod]
+    protected function assertNumReads(int $numReads): void
+    {
+        $queries = $this->context->queryLog()->readsSinceMark();
+        Assert::same($queries, $numReads, "Number of read SQL queries do not match, expected {$numReads} got {$queries}.");
+    }
+
+    #[AssertMethod]
+    protected function assertNumWrites(int $numWrites): void
+    {
+        $queries = $this->context->queryLog()->writesSinceMark();
+        Assert::same($queries, $numWrites, "Number of write SQL queries do not match, expected {$numWrites} got {$queries}.");
     }
 
     protected function serverVersion(): string
