@@ -24,16 +24,6 @@ final class Env
     ) {}
 
     /**
-     * A copy whose given values win over the environment and the defaults.
-     *
-     * @param array<non-empty-string, string> $overrides
-     */
-    public function with(array $overrides): self
-    {
-        return new self($this->defaults, $overrides + $this->overrides);
-    }
-
-    /**
      * The shared instance over {@see self::DEFAULTS_FILE}.
      */
     public static function load(): self
@@ -65,6 +55,16 @@ final class Env
         }
 
         return new self($values);
+    }
+
+    /**
+     * A copy whose given values win over the environment and the defaults.
+     *
+     * @param array<non-empty-string, string> $overrides
+     */
+    public function with(array $overrides): self
+    {
+        return new self($this->defaults, $overrides + $this->overrides);
     }
 
     /**
