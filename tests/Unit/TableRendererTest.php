@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\Testing\Tests\Unit;
 
+use Cycle\Database\Exception\SchemaException;
 use Cycle\Database\Schema\AbstractTable;
 use Cycle\Testing\Database\Memory;
 use Cycle\Testing\Database\Schema\TableRenderer;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Test;
 
 #[Test]
@@ -72,6 +74,12 @@ final class TableRendererTest
         $table = self::render(['e' => 'enum(1a, a1, 2)']);
 
         Assert::same($table->column('e')->getEnumValues(), ['1a', 'a1', '2']);
+    }
+
+    public function definitionWithoutATypeIsRejected(): never
+    {
+        Expect::exception(SchemaException::class)->withMessage("Invalid column type definition in 't'.'n'");
+        self::render(['n' => '(10)']);
     }
 
     /**

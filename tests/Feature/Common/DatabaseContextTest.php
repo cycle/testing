@@ -74,6 +74,28 @@ final class DatabaseContextTest extends DatabaseTestCase
         SchemaAssert::sameAsInDb($schema);
     }
 
+    public function compositeForeignKeySpansBothColumns(): void
+    {
+        $this->makeTable('pair', ['a' => 'integer', 'b' => 'integer'], pk: ['a', 'b']);
+        $this->makeTable('pair_ref', ['id' => 'primary', 'pa' => 'integer', 'pb' => 'integer']);
+
+        $this->makeCompositeFK('pair_ref', ['pa', 'pb'], 'pair', ['a', 'b']);
+
+        $schema = $this->schema('pair_ref');
+        Assert::true($schema->hasForeignKey(['pa', 'pb']));
+        Assert::same($schema->foreignKey(['pa', 'pb'])->getForeignKeys(), ['a', 'b']);
+    }
+
+    public function fetchSchemaRereadsTheTable(): void
+    {
+        $this->makeTable('reread', ['id' => 'primary']);
+        $declared = $this->database->table('reread')->getSchema();
+        $declared->string('added', 16)->nullable(true);
+
+        Assert::true($declared->hasColumn('added'));
+        Assert::false($this->fetchSchema($declared)->hasColumn('added'));
+    }
+
     public function dbVariantSharesServer(): void
     {
         $this->makeTable('shared', ['id' => 'primary']);
