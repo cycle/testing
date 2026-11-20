@@ -8,6 +8,8 @@ use Cycle\Testing\Regression\CaseGenerator;
 use Cycle\Testing\Regression\Command;
 use Cycle\Testing\Regression\TemplateSet;
 use Testo\Assert;
+use Testo\Data\DataSet;
+use Testo\Expect;
 use Testo\Lifecycle\AfterTest;
 use Testo\Test;
 
@@ -51,6 +53,82 @@ final class CaseGeneratorTest
             CaseGenerator::namespaceOf($root, 'tests/ORM/Regression/Issue482'),
             'Cycle\ORM\Tests\Regression\Issue482',
         );
+    }
+
+    #[DataSet(['12a'], 'digits then letters')]
+    #[DataSet(['a-b'], 'a dash after a valid start')]
+    #[DataSet(['-b'], 'a dash before a valid end')]
+    public function caseNameMustBeANamespaceSegment(string $issue): never
+    {
+        Expect::exception(\InvalidArgumentException::class)
+            ->withMessage("`{$issue}` is neither an issue number nor a valid namespace segment.");
+
+        CaseGenerator::caseName($issue);
+    }
+
+    public function namespaceNeedsComposerJson(): never
+    {
+        $root = $this->project([]);
+        \unlink("{$root}/composer.json");
+
+        Expect::exception(\RuntimeException::class)->withMessage("No composer.json in `{$root}`.");
+
+        CaseGenerator::namespaceOf($root, 'tests/Regression');
+    }
+
+    public function namespaceOutsideEveryRootFails(): never
+    {
+        $root = $this->project(['autoload' => ['psr-4' => ['App\\' => 'src/']]]);
+
+        Expect::exception(\RuntimeException::class)->withMessageContaining('`tests/Regression` is under no PSR-4 root');
+
+        CaseGenerator::namespaceOf($root, 'tests/Regression');
+    }
+
+    /**
+     * @param array<string, string|list<string>> $dev
+     * @param array<string, string|list<string>> $prod
+     */
+    #[DataSet([[], ['App\\Tests\\' => 'tests/']], 'from autoload when autoload-dev has no match')]
+    #[DataSet([['App\\' => ''], [], 'App\tests\Regression\Issue1'], 'from the root mapping')]
+    #[DataSet([['App\\Tests\\' => 'tests/', 'Long\\' => 'tests-longer-folder/']], 'ignoring a longer root it is not under')]
+    #[DataSet([['Other\\' => 'lib/', 'App\\Tests\\' => 'tests/']], 'after a root it is not under')]
+    #[DataSet([['App\\Tests\\' => ['lib/', 'tests/']]], 'from the second path of a root')]
+    #[DataSet([['App\\Tests\\' => 'tests/', 'Other\\Tests\\' => 'tests/']], 'from the first of equal roots')]
+    #[DataSet([['App\\Tests\\' => './tests']], 'from a dot-relative root')]
+    #[DataSet([['App\\Tests\\' => 'tests\\']], 'from a root with backslashes')]
+    #[DataSet([['App\\Tests\\' => 'tests/'], ['Prod\\' => 'tests/Regression/']], 'from autoload-dev before autoload')]
+    public function namespaceOfIssueFolder(array $dev, array $prod = [], string $expected = 'App\Tests\Regression\Issue1'): void
+    {
+        $root = $this->project(['autoload-dev' => ['psr-4' => $dev], 'autoload' => ['psr-4' => $prod]]);
+
+        Assert::same(CaseGenerator::namespaceOf($root, 'tests/Regression/Issue1'), $expected);
+    }
+
+    public function namespaceOfTheRootFolderItself(): void
+    {
+        $root = $this->project(['autoload-dev' => ['psr-4' => ['App\\Tests\\' => 'tests/Regression']]]);
+
+        Assert::same(CaseGenerator::namespaceOf($root, 'tests\\Regression'), 'App\Tests');
+    }
+
+    public function namespaceFromTheLongerRootEvenWithAShortPrefix(): void
+    {
+        $root = $this->project(['autoload-dev' => ['psr-4' => ['Very\\Long\\Prefix\\' => 'tests/', 'Short\\' => 'tests/Regression/']]]);
+
+        Assert::same(CaseGenerator::namespaceOf($root, 'tests/Regression/Issue1'), 'Short\Issue1');
+    }
+
+    public function generateFillsAnEmptyExistingFolder(): void
+    {
+        $root = $this->project([]);
+        \mkdir("{$root}/case");
+        $set = TemplateSet::load('orm');
+
+        $written = (new CaseGenerator())->generate($set, "{$root}/case", 'Acme\Case1');
+
+        Assert::same($written, \array_map(static fn(string $file): string => "{$root}/case/{$file}", \array_keys($set->files)));
+        Assert::same(\fileperms("{$root}/case/Entity") & 07777, 0777 & ~\umask());
     }
 
     public function overlayReplacesOnlyItsFiles(): void
