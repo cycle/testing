@@ -21,6 +21,8 @@ final class QueryLog extends AbstractLogger
 {
     private int $reads = 0;
     private int $writes = 0;
+    private int $readMark = 0;
+    private int $writeMark = 0;
 
     /** @var list<string> */
     private array $queries = [];
@@ -81,10 +83,47 @@ final class QueryLog extends AbstractLogger
         return $this->queries;
     }
 
+    /**
+     * Start counting reads afresh for {@see self::readsSinceMark()}; the totals keep running.
+     */
+    public function markReads(): void
+    {
+        $this->readMark = $this->reads;
+    }
+
+    /**
+     * Start counting writes afresh for {@see self::writesSinceMark()}; the totals keep running.
+     */
+    public function markWrites(): void
+    {
+        $this->writeMark = $this->writes;
+    }
+
+    /**
+     * Reads since {@see self::markReads()}, or since the last {@see self::reset()} when not marked since.
+     */
+    public function readsSinceMark(): int
+    {
+        return $this->reads - $this->readMark;
+    }
+
+    /**
+     * Writes since {@see self::markWrites()}, or since the last {@see self::reset()} when not marked since.
+     */
+    public function writesSinceMark(): int
+    {
+        return $this->writes - $this->writeMark;
+    }
+
+    /**
+     * Zero the counters, the marks and the recorded queries; the harness does it after every test.
+     */
     public function reset(): void
     {
         $this->reads = 0;
         $this->writes = 0;
+        $this->readMark = 0;
+        $this->writeMark = 0;
         $this->queries = [];
     }
 

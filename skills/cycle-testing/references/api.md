@@ -62,6 +62,7 @@ Hand-written equivalent of one driver suite:
 | `makeTable($t, ['id' => 'primary', 'x' => 'string(32), nullable'], fk:, pk:, defaults:)`, `makeFK`, `makeCompositeFK`, `makeIndex` | DDL from short definitions (`Schema\TableBuilder`) |
 | `wrapDriver()` | the instrumented driver; needs `#[WrapDriver]` |
 | `serverVersion()` | PDO server version |
+| `captureReadQueries()`, `captureWriteQueries()`, `assertNumReads($n)`, `assertNumWrites($n)` | queries since the capture (or since the test started), as in orm's old `BaseTest`; `QueryLog::markReads()` / `readsSinceMark()` underneath |
 
 A variant of an in-memory SQLite driver is a separate, empty database.
 
