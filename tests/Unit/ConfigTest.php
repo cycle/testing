@@ -42,4 +42,23 @@ final class ConfigTest
 
         Assert::same(\count($config->suites), 1);
     }
+
+    public function repoWithoutTestFoldersBuildsAnEmptySuite(): void
+    {
+        $root = \sys_get_temp_dir() . '/cycle-testing-' . \bin2hex(\random_bytes(4));
+        \mkdir($root);
+
+        try {
+            $config = Config::forPackage('cycle/empty', root: $root)
+                ->unit('tests/Unit')
+                ->acceptance('tests/Acceptance', drivers: [Driver::SQLite], exclude: ['tests/Fixtures'])
+                ->build();
+        } finally {
+            \rmdir($root);
+        }
+
+        Assert::same(\count($config->suites), 1);
+        Assert::same($config->suites[0]->location->includes, []);
+        Assert::same($config->src->includes, []);
+    }
 }
