@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cycle\Testing\Tests\Unit;
 
 use Cycle\ORM\EntityManager;
+use Cycle\ORM\Heap\HeapInterface;
+use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Reference;
@@ -298,6 +300,40 @@ final class HeapIntegrityTest
         );
 
         Assert::same($violations, ['Entity and State are not in sync `post`.`author`']);
+    }
+
+    public function heapEntityWithoutANodeIsReported(): void
+    {
+        $heap = new class implements HeapInterface, \IteratorAggregate {
+            public function getIterator(): \Iterator
+            {
+                return new \ArrayIterator([new User()]);
+            }
+
+            public function has(object $entity): bool
+            {
+                return false;
+            }
+
+            public function get(object $entity): ?Node
+            {
+                return null;
+            }
+
+            public function find(string $role, array $scope): ?object
+            {
+                return null;
+            }
+
+            public function attach(object $entity, Node $node, array $index = []): void {}
+
+            public function detach(object $entity): void {}
+
+            public function clean(): void {}
+        };
+        $orm = Memory::orm(UserSchema::schema())->with(heap: $heap);
+
+        Assert::same(HeapIntegrity::violations($orm), ['No node for a heap entity of class ' . User::class . '.']);
     }
 
     /**
