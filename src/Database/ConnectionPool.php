@@ -12,6 +12,7 @@ use Cycle\Database\Config\SQLiteDriverConfig;
 use Cycle\Database\Database;
 use Cycle\Database\DatabaseManager;
 use Cycle\Database\Driver\DriverInterface;
+use Cycle\Database\NamedInterface;
 use Psr\Log\LoggerAwareInterface;
 
 /**
@@ -60,6 +61,7 @@ final class ConnectionPool
         $key = \hash('crc32', $driverClass . ':' . \json_encode($driverOptions) . \json_encode($connectionOptions));
 
         return $this->drivers[$key] ??= $this->create(
+            'default',
             self::applyOptions($this->driver->config($this->env, $driverClass), $driverOptions, $connectionOptions),
         );
     }
@@ -82,7 +84,7 @@ final class ConnectionPool
         foreach ($this->layout->names() as $name) {
             /** @psalm-suppress InvalidArgument The config templates are narrower than SQLite's config. */
             $driver = $this->layout->isSqlite($name)
-                ? $this->drivers["sqlite:{$name}"] ??= $this->create(new SQLiteDriverConfig(
+                ? $this->drivers["sqlite:{$name}"] ??= $this->create($name, new SQLiteDriverConfig(
                     connection: new MemoryConnectionConfig(),
                     options: ['logInterpolatedQueries' => true],
                 ))
@@ -148,13 +150,18 @@ final class ConnectionPool
         return $config;
     }
 
-    private function create(DriverConfig $config): DriverInterface
+    /**
+     * @param non-empty-string $name Named like `DatabaseConfig` names its drivers: after the connection,
+     *        which code under test compares to tell databases apart.
+     */
+    private function create(string $name, DriverConfig $config): DriverInterface
     {
         /**
          * @psalm-suppress ArgumentTypeCoercion, InvalidArgument Each driver accepts its own config subclass.
          * @var DriverInterface $driver
          */
         $driver = $config->driver::create($config);
+        $driver instanceof NamedInterface and $driver = $driver->withName($name);
         $driver instanceof LoggerAwareInterface and $driver->setLogger($this->queryLog);
 
         return $driver;

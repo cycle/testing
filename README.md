@@ -147,7 +147,8 @@ The password is `YourStrong!Passw0rd` for every server.
 - **Base classes:** `Database\DatabaseTestCase` (`makeTable()`, `db()`, `schema()`), `ORM\OrmTestCase`
   (fresh ORM per test, `withSchema()`, `save()`, heap check).
 - **Assertions:** `SqlAssert`, `QueryAssert`, `SchemaAssert`.
-- **Mocks:** wrap drivers (`#[WrapDriver]`), `StubDriver` + `FakePDO`, in-memory `Memory` helpers.
+- **Mocks:** wrap drivers (`#[WrapDriver]`), `StubDriver` + `FakePDO`, in-memory `Memory` helpers,
+  `Container\SimpleContainer` (a PSR-11 container of fixed definitions).
 
 The full reference is the agent skill [`skills/cycle-testing`](skills/cycle-testing/SKILL.md), which
 [`llm/skills`](https://github.com/roxblnfk/skills) installs into consumer projects together with Testo's own

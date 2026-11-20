@@ -51,8 +51,10 @@ data on the next sync. Opt out with `#[SkipHeapCheck]` on the method or class.
 
 ## Schemas
 
-- `SchemaSource::fromArray($array)`, `fromSchema($schema)`, `fromFile($path)`, `compiled(fn(DatabaseProviderInterface $dbal): array)`.
-  A compiled source runs once, against a throwaway in-memory SQLite database.
+- `SchemaSource::fromArray($array)`, `fromSchema($schema)`, `fromFile($path)`,
+  `compiled(fn(DatabaseProviderInterface $dbal): array, ?Layout $layout = null)`. A compiled source runs once
+  per layout, against throwaway in-memory SQLite databases of the suite's layout (`OrmPlugin` passes it), so
+  entities with `database: 'secondary'` compile; `$layout` overrides it.
 - `Schema\SchemaCompiler::compile($dbal, [Entity::class, ...] | ClassesInterface, ?generators)` runs the
   annotated pipeline (`ResetTables` … `SyncTables`, `GenerateTypecast`) and creates the tables in `$dbal`.
   `SchemaCompiler::defaultGenerators($classes, syncTables: false)` builds the pipeline without DDL.
