@@ -13,7 +13,7 @@ use Testo\Assert;
 use Testo\Common\Attribute\AssertMethod;
 
 /**
- * Base for ORM tests in an `Acceptance/<Driver>` suite with `OrmPlugin`.
+ * Base for ORM tests in a per-driver suite (`Feature/<Driver>` and the like) with `OrmPlugin`.
  *
  * `$this->orm` is a fresh ORM before every test, on the plugin's schema; {@see self::withSchema()} swaps
  * the schema for the rest of the test.

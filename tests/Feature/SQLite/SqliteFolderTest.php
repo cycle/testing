@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\Testing\Tests\Acceptance\SQLite;
+namespace Cycle\Testing\Tests\Feature\SQLite;
 
 use Cycle\Testing\Database\DatabaseTestCase;
 use Cycle\Testing\Database\Driver;

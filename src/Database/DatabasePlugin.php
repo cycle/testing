@@ -14,12 +14,12 @@ use Testo\Pipeline\InterceptorCollector;
 /**
  * Suite plugin that runs the suite's tests against one database driver.
  *
- * Register one per driver suite (`Config::acceptance()` does it for you):
+ * Register one per driver suite (`Config::feature()` and its siblings do it for you):
  *
  * ```
  * new SuiteConfig(
- *     name: 'Acceptance/MySQL',
- *     location: ['tests/Acceptance/Common', 'tests/Acceptance/MySQL'],
+ *     name: 'Feature/MySQL',
+ *     location: ['tests/Feature/Common', 'tests/Feature/MySQL'],
  *     plugins: [new DatabasePlugin(Driver::MySQL)],
  * )
  * ```

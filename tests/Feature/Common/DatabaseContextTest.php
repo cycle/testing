@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\Testing\Tests\Acceptance\Common;
+namespace Cycle\Testing\Tests\Feature\Common;
 
 use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\Assert\SchemaAssert;
@@ -57,7 +57,7 @@ final class DatabaseContextTest extends DatabaseTestCase
         $this->makeTable('parent', ['id' => 'primary', 'name' => 'string(64)']);
         $this->makeTable(
             'child',
-            ['id' => 'primary', 'parent_id' => 'integer', 'note' => 'text, nullable'],
+            ['id' => 'primary', 'parent_id' => 'integer', 'note' => 'string(64), nullable'],
             fk: ['parent_id' => ['table' => 'parent', 'column' => 'id']],
         );
         $this->makeIndex('child', ['note'], unique: false);

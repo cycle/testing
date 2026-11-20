@@ -6,8 +6,8 @@
 | `Isolation::Transaction` | before: begin on every connection; after: roll back | a fixed schema created once by `prepare` |
 | `Isolation::None` | nothing | tests that assert no transaction is open, or leave no state |
 
-Pick the suite default in `testo.php` (`acceptance(isolation: …)`), override with `#[Isolate(...)]` on a
-class or method.
+Pick the suite default in `testo.php` (`feature(isolation: …)`, likewise for every per-driver kind),
+override with `#[Isolate(...)]` on a class or method.
 
 ## What always happens
 
@@ -31,7 +31,7 @@ per-test tables in `#[BeforeTest]`.
 ## Seeding once per suite
 
 ```php
-->acceptance('tests/Acceptance',
+->feature('tests/Feature',
     isolation: Isolation::Transaction,
     prepare: static function (DatabaseContext $ctx): void {
         SchemaCompiler::compile($ctx->dbal(), [User::class, Post::class]);   // creates the tables

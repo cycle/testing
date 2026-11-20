@@ -11,7 +11,7 @@ Prefer a real in-memory SQLite database or a hand-written fake over a mock objec
 
 ## Wrap drivers (real database, instrumented)
 
-`#[WrapDriver]` on an acceptance class puts `default` on `Mock\<Driver>WrapDriver`. `$this->wrapDriver()`
+`#[WrapDriver]` on a database test class puts `default` on `Mock\<Driver>WrapDriver`. `$this->wrapDriver()`
 returns it:
 
 | Knob | Effect |

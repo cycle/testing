@@ -16,7 +16,7 @@ use Cycle\Testing\Database\Mock\WrapDriverInterface;
 use Cycle\Testing\Database\Schema\TableTrait;
 
 /**
- * Base for tests that run in an `Acceptance/<Driver>` suite.
+ * Base for tests that run in a per-driver suite (`Feature/<Driver>` and the like).
  *
  * The properties are set by {@see self::attachDatabase()} before the first hook of the case runs.
  */
