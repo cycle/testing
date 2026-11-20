@@ -1,0 +1,90 @@
+{
+    "name": "cycle/testing",
+    "description": "Shared Testo test harness for Cycle ORM packages: multi-driver suites, isolation, DB mocks",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "cycle",
+        "orm",
+        "database",
+        "testing",
+        "testo"
+    ],
+    "authors": [
+        {
+            "name": "Aleksei Gagarin (roxblnfk)",
+            "homepage": "https://github.com/roxblnfk"
+        }
+    ],
+    "homepage": "https://cycle-orm.dev",
+    "support": {
+        "issues": "https://github.com/cycle/testing/issues",
+        "source": "https://github.com/cycle/testing"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/cycle"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "cycle/database": "^2.23",
+        "psr/log": "^2 || ^3",
+        "testo/testo": "^0.10.60"
+    },
+    "require-dev": {
+        "cycle/annotated": "^4.6",
+        "cycle/orm": "^2.18",
+        "cycle/schema-builder": "^2.12",
+        "doctrine/collections": "^2.6 || ^3.0",
+        "llm/skills": "^1.20",
+        "mockery/mockery": "^1.6",
+        "testo/bridge-mockery": "^0.1.2",
+        "vimeo/psalm": "^7.12"
+    },
+    "suggest": {
+        "cycle/annotated": "Schema\\SchemaCompiler: compile an ORM schema from annotated entities",
+        "cycle/orm": "ORM layer (Cycle\\Testing\\ORM)",
+        "cycle/schema-builder": "Schema\\SchemaCompiler: compile an ORM schema from annotated entities",
+        "llm/skills": "Installs the cycle-testing and testo-* agent skills",
+        "testo/bridge-mockery": "Config adds MockeryPlugin to every suite when installed"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Cycle\\Testing\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cycle\\Testing\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "llm/skills": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-1.x": "1.x-dev"
+        },
+        "skills": {
+            "source": "skills"
+        }
+    },
+    "scripts": {
+        "db:down": "docker compose -f resources/docker/compose.yaml down -v",
+        "db:up": "docker compose -f resources/docker/compose.yaml up -d --wait",
+        "psalm": "psalm",
+        "test": "testo",
+        "test:mysql": "testo --suite=Acceptance/MySQL",
+        "test:postgres": "testo --suite=Acceptance/Postgres",
+        "test:sqlite": "testo --suite=Acceptance/SQLite",
+        "test:sqlserver": "testo --suite=Acceptance/SQLServer",
+        "test:unit": "testo --suite=Unit"
+    }
+}
