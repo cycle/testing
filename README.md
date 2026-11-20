@@ -131,13 +131,15 @@ it and the harness reads connection defaults from it. Exported variables overrid
 |---|---|
 | `DB_DRIVERS` | `sqlite,mysql,postgres,sqlserver` |
 | `DB_REQUIRED` | `0` |
-| `DB_DEBUG` | `0` (`1` echoes every query) |
 | `DB_SQLITE_FILE` | empty: in-memory |
 | `DB_MYSQL_*` | `127.0.0.1:13306`, database `spiral`, `root`, image `mysql:8.0` |
 | `DB_POSTGRES_*` | `127.0.0.1:15432`, database `spiral`, `postgres`, image `postgres:15` |
 | `DB_SQLSERVER_*` | `127.0.0.1:11433`, database `tempdb`, `SA`, image `mssql/server:2022-latest` |
 
 The password is `YourStrong!Passw0rd` for every server.
+
+A test's SQL goes to the Testo `query.sql` channel: it is printed with a failed test's output and kept for
+every test in the HTML report (`vendor/bin/testo --log-html`).
 
 ## What is inside
 

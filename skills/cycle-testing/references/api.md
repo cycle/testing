@@ -100,6 +100,5 @@ The nearest level wins: method attributes over class attributes, a class over it
 |---|---|---|
 | `DB_DRIVERS` | `sqlite,mysql,postgres,sqlserver` | driver suites `Config` registers (`DB` is a deprecated alias) |
 | `DB_REQUIRED` | `0` | `1`: unreachable database fails instead of skipping |
-| `DB_DEBUG` | `0` | `1`: echo queries to stdout (they are always attached to the test report) |
 | `DB_SQLITE_FILE` | empty (in-memory) | SQLite file for debugging |
 | `DB_<DRIVER>_{HOST,PORT,DATABASE,USER,PASSWORD,IMAGE}` | see `resources/docker/.env` | connection and docker image |
