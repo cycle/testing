@@ -1,0 +1,4 @@
+{
+    "description": "orm-attributes plus cycle/entity-behavior: CreatedAt, UpdatedAt, SoftDelete, OptimisticLock",
+    "extends": "orm-attributes"
+}

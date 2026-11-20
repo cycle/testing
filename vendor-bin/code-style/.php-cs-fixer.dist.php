@@ -7,6 +7,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 return \Spiral\CodeStyle\Builder::create()
     ->include(__DIR__ . '/../../src')
     ->include(__DIR__ . '/../../tests')
+    ->include(__DIR__ . '/../../resources/case-templates')
+    ->include(__DIR__ . '/../../bin/cycle-testing')
     ->include(__DIR__ . '/../../testo.php')
     ->include(__FILE__)
     ->cache(__DIR__ . '/../../runtime/php-cs-fixer.cache')

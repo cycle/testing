@@ -122,6 +122,27 @@ Consumer `composer.json` scripts:
 "db:down": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml down -v"
 ```
 
+## Regression cases
+
+`vendor/bin/cycle-testing new-case <issue>` writes a runnable case into `tests/Regression/Issue<issue>/`, in
+the namespace that `autoload-dev` (PSR-4) of your `composer.json` gives that folder:
+
+```
+vendor/bin/cycle-testing new-case 482 --template=orm --dir=tests/ORM/Regression
+vendor/bin/cycle-testing templates
+```
+
+| Option | Default | |
+|---|---|---|
+| `--template=` | `orm` | `database`, `orm` (array schema), `orm-attributes` (cycle/annotated), `orm-behaviors` (plus cycle/entity-behavior) |
+| `--dir=` | `tests/Regression` | folder of the cases, relative to the project root |
+| `--namespace=` | from `composer.json` | namespace of `--dir`; the case name is appended |
+| `--force` | | write into an existing folder |
+
+A repo pins its choice in a script, e.g. `"test:new-case": "cycle-testing new-case --template=orm-attributes"`,
+then runs `composer test:new-case -- 482`. The templates live in [`resources/case-templates`](resources/case-templates);
+a set's `template.json` may `extend` another and override only some of its files.
+
 ## Configuration
 
 [`resources/docker/.env`](resources/docker/.env) is the single source of truth: docker compose interpolates

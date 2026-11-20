@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+# Composer's bin proxy sets the autoloader path; run directly, the package is its own project or in vendor/.
+$autoload = $GLOBALS['_composer_autoload_path'] ?? null;
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $candidate) {
+    $autoload ??= \is_file($candidate) ? $candidate : null;
+}
+$autoload === null and \fwrite(\STDERR, "Composer autoloader not found.\n") and exit(1);
+require $autoload;
+
+# The project is the folder whose vendor/ holds the autoloader; commands run there by composer scripts.
+$root = \dirname(\realpath($autoload), 2);
+
+exit((new \Cycle\Testing\Regression\Command($root))->run(\array_slice($argv, 1)));
