@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.1](https://github.com/cycle/testing/compare/0.1.0...0.1.1) (2026-11-20)
+
+
+### Features
+
+* add the cycle-testing new-case generator with built-in case templates ([#12](https://github.com/cycle/testing/issues/12)) ([da71062](https://github.com/cycle/testing/commit/da71062b4db350ba41ed9dd633c10c735a2a7e75))
+
+
+### Documentation
+
+* document the generator, its options and templates ([da71062](https://github.com/cycle/testing/commit/da71062b4db350ba41ed9dd633c10c735a2a7e75))
+
 ## 0.1.0 (2026-11-20)
 
 
