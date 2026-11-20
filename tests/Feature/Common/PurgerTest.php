@@ -21,6 +21,8 @@ final class PurgerTest extends DatabaseTestCase
         $this->makeFK('author', 'book_id', 'book', 'id', ForeignKeyInterface::NO_ACTION, ForeignKeyInterface::NO_ACTION);
         $this->database->table('author')->insertOne(['book_id' => null]);
         $this->database->table('book')->insertOne(['author_id' => 1]);
+        Assert::true($this->schema('book')->hasForeignKey(['author_id']));
+        Assert::true($this->schema('author')->hasForeignKey(['book_id']));
 
         Purger::dropTables($this->database->getDriver());
 

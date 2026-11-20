@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Cycle\Testing\Tests\Unit;
 
 use Cycle\Database\Config\MySQLDriverConfig;
+use Cycle\Database\Config\Postgres\TcpConnectionConfig as PostgresConnection;
 use Cycle\Database\Config\SQLite\FileConnectionConfig;
 use Cycle\Database\Config\SQLite\MemoryConnectionConfig;
+use Cycle\Database\Config\SQLServer\TcpConnectionConfig as SQLServerConnection;
 use Cycle\Testing\Database\Driver;
 use Cycle\Testing\Database\Env;
 use Cycle\Testing\Database\Feature;
 use Cycle\Testing\Database\Mock\MySQLWrapDriver;
+use Cycle\Testing\Database\Mock\PostgresWrapDriver;
+use Cycle\Testing\Database\Mock\SQLiteWrapDriver;
+use Cycle\Testing\Database\Mock\SQLServerWrapDriver;
 use Testo\Assert;
 use Testo\Expect;
 use Testo\Test;
@@ -54,6 +59,41 @@ final class DriverTest
         Assert::true(Driver::Postgres->supports(Feature::Returning));
         Assert::false(Driver::MySQL->supports(Feature::Returning));
         Assert::false(Driver::MySQL->supports(Feature::TransactionalDdl));
+    }
+
+    public function featureMatrix(): void
+    {
+        $matrix = [];
+        foreach (Feature::cases() as $feature) {
+            $matrix[$feature->name] = \array_column($feature->drivers(), 'value');
+        }
+
+        Assert::same($matrix, [
+            'Returning' => ['sqlite', 'postgres', 'sqlserver'],
+            'FullJoin' => ['postgres', 'sqlserver'],
+            'ForUpdate' => ['mysql', 'postgres', 'sqlserver'],
+            'Schemas' => ['postgres', 'sqlserver'],
+            'TransactionalDdl' => ['sqlite', 'postgres'],
+        ]);
+    }
+
+    public function everyDriverHasItsConfigAndWrapDriver(): void
+    {
+        $env = Env::load();
+
+        Assert::instanceOf(Driver::Postgres->config($env)->connection, PostgresConnection::class);
+        Assert::instanceOf(Driver::SQLServer->config($env)->connection, SQLServerConnection::class);
+        Assert::same(Driver::SQLite->wrapDriverClass(), SQLiteWrapDriver::class);
+        Assert::same(Driver::MySQL->wrapDriverClass(), MySQLWrapDriver::class);
+        Assert::same(Driver::Postgres->wrapDriverClass(), PostgresWrapDriver::class);
+        Assert::same(Driver::SQLServer->wrapDriverClass(), SQLServerWrapDriver::class);
+    }
+
+    public function serverConnectionsTimeOutQuickly(): void
+    {
+        $options = Driver::MySQL->config(Env::load())->connection->getOptions();
+
+        Assert::same($options[\PDO::ATTR_TIMEOUT], (string) Driver::CONNECT_TIMEOUT);
     }
 
     public function configReadsEnv(): void
