@@ -24,6 +24,17 @@ final class WrapDriverTest extends DatabaseTestCase
         $driver->disconnect();
 
         Assert::same($driver->disconnectCalls, 1);
+        Assert::false($driver->isConnected());
+    }
+
+    public function oneFailedBeginIsRetried(): void
+    {
+        $this->wrapDriver()->exceptionOnTransactionBegin = 1;
+
+        $this->database->begin();
+
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        $this->database->rollback();
     }
 
     public function knobsAreResetBetweenTests(): void

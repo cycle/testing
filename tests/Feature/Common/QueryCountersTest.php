@@ -7,6 +7,8 @@ namespace Cycle\Testing\Tests\Feature\Common;
 use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\DatabaseTestCase;
 use Cycle\Testing\Database\QueryLog;
+use Testo\Assert\State\Assertion\AssertionException;
+use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
@@ -55,5 +57,21 @@ final class QueryCountersTest extends DatabaseTestCase
         $log = new QueryLog();
 
         QueryAssert::count(0, 1, fn() => $log->info('DELETE FROM t', ['elapsed' => 0.1]), $log);
+    }
+
+    public function readCountMismatchFails(): never
+    {
+        $this->captureReadQueries();
+
+        Expect::exception(AssertionException::class)->withMessageContaining('Number of read SQL queries do not match, expected 1 got 0.');
+
+        $this->assertNumReads(1);
+    }
+
+    public function wrapDriverNeedsTheAttribute(): never
+    {
+        Expect::exception(\LogicException::class)->withMessageContaining('WrapDriver');
+
+        $this->wrapDriver();
     }
 }

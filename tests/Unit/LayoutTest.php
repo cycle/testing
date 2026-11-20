@@ -7,6 +7,7 @@ namespace Cycle\Testing\Tests\Unit;
 use Cycle\Testing\Database\Layout;
 use Cycle\Testing\Database\Memory;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Test;
 
 #[Test]
@@ -34,5 +35,26 @@ final class LayoutTest
 
         Assert::same($layout->prefix('default'), 'tests_');
         Assert::false($layout->isSqlite('slave'));
+    }
+
+    public function defaultCannotHaveItsOwnSqlite(): never
+    {
+        Expect::exception(\InvalidArgumentException::class)->withMessage('`default` always uses the suite driver.');
+
+        Layout::withSqlite(['default']);
+    }
+
+    public function unknownDatabaseHasNoPrefix(): never
+    {
+        Expect::exception(\OutOfBoundsException::class)->withMessage('No database `nope`.');
+
+        Layout::single()->prefix('nope');
+    }
+
+    public function unknownDatabaseHasNoConnection(): never
+    {
+        Expect::exception(\OutOfBoundsException::class)->withMessage('No database `nope`.');
+
+        Layout::single()->isSqlite('nope');
     }
 }

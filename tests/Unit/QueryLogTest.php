@@ -7,6 +7,7 @@ namespace Cycle\Testing\Tests\Unit;
 use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\Memory;
 use Cycle\Testing\Database\QueryLog;
+use Psr\Log\AbstractLogger;
 use Testo\Assert;
 use Testo\Test;
 
@@ -62,6 +63,42 @@ final class QueryLogTest
         Assert::same($run['result'], 'done');
         Assert::same([$run['reads'], $run['writes']], [0, 1]);
         Assert::same($run['queries'], ['DELETE FROM t']);
+    }
+
+    public function forwardsEveryMessageAsALine(): void
+    {
+        $forward = new class extends AbstractLogger {
+            /** @var list<string> */
+            public array $lines = [];
+
+            public function log($level, string|\Stringable $message, array $context = []): void
+            {
+                $this->lines[] = (string) $message;
+            }
+        };
+        $log = new QueryLog();
+        $log->forwardTo($forward);
+
+        $log->info(new class implements \Stringable {
+            public function __toString(): string
+            {
+                return 'SELECT 1';
+            }
+        }, ['elapsed' => 0.1]);
+        $log->info('Begin transaction');
+
+        Assert::same($forward->lines, ["SELECT 1\n", "Begin transaction\n"]);
+        Assert::same($log->queries(), ['SELECT 1']);
+    }
+
+    public function postgresCatalogQueriesAreNotCounted(): void
+    {
+        $log = new QueryLog();
+        foreach (['tc.constraint_name', 'pg_indexes', 'pg_constraint', 'information_schema', 'pg_class'] as $marker) {
+            $log->info("SELECT {$marker} FROM x", ['elapsed' => 0.1]);
+        }
+
+        Assert::same($log->countReads(), 0);
     }
 
     public function queryAssertOnRealDriver(): void
