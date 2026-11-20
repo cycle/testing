@@ -1,18 +1,51 @@
-# cycle/testing
+<div align="center">
+    <a href="https://cycle-orm.dev" target="_blank">
+        <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="https://github.com/cycle/.github/blob/main/logo/words-vector-dark.svg?raw=true">
+            <img width="50%" align="center" src="https://github.com/cycle/.github/blob/main/logo/words-vector-light.svg?raw=true" alt="CycleORM Logo">
+        </picture>
+    </a>
+</div>
 
-Shared [Testo](https://github.com/php-testo/testo) test harness for the Cycle ORM packages. One test tree runs
+<p align="center">Shared Testo test harness for the Cycle ORM packages</p>
+
+<div align="center">
+
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=gitbook&logoColor=white)](https://cycle-orm.dev/docs)
+[![Sponsor](https://img.shields.io/static/v1?style=for-the-badge&label=&message=Sponsor&logo=githubsponsors&logoColor=white&color=%23EA4AAA)](https://github.com/sponsors/cycle)
+[![Discord](https://img.shields.io/discord/538114875570913290?style=for-the-badge&logo=discord&labelColor=7289d9&logoColor=white&color=39456d)](https://discord.gg/spiralphp)
+
+[![Psalm Level](https://shepherd.dev/github/cycle/testing/level.svg)](https://shepherd.dev/github/cycle/testing)
+[![Type Coverage](https://shepherd.dev/github/cycle/testing/coverage.svg)](https://shepherd.dev/github/cycle/testing)
+[![Codecov](https://img.shields.io/codecov/c/github/cycle/testing/1.x?style=flat-square&logo=codecov)](https://app.codecov.io/gh/cycle/testing/tree/1.x)
+
+</div>
+
+<br />
+
+A [Testo](https://github.com/php-testo/testo) test harness shared by the Cycle ORM packages. One test tree runs
 as one suite per database driver; the harness owns the connections, the cleanup between tests, the test
 databases in docker, and the helpers every package used to copy around.
 
-```
+## Get Started
+
+### Installation
+
+The package requires PHP 8.2+, `testo/testo` and `cycle/database`.
+
+```bash
 composer require --dev cycle/testing
 ```
 
-Requires PHP 8.2+, `testo/testo` and `cycle/database`. The ORM helpers additionally need `cycle/orm`;
-`SchemaCompiler` needs `cycle/annotated` and `cycle/schema-builder`. With `testo/bridge-mockery` installed,
-Mockery expectations are verified in every suite.
+[![PHP](https://img.shields.io/packagist/php-v/cycle/testing.svg?style=flat-square&logo=php)](https://packagist.org/packages/cycle/testing)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/cycle/testing.svg?style=flat-square&logo=packagist)](https://packagist.org/packages/cycle/testing)
+[![License](https://img.shields.io/packagist/l/cycle/testing.svg?style=flat-square)](LICENSE.md)
+[![Total Downloads](https://img.shields.io/packagist/dt/cycle/testing.svg?style=flat-square)](https://packagist.org/packages/cycle/testing/stats)
 
-## Quick start
+The ORM helpers additionally need `cycle/orm`; `SchemaCompiler` needs `cycle/annotated` and
+`cycle/schema-builder`. With `testo/bridge-mockery` installed, Mockery expectations are verified in every suite.
+
+### Quick start
 
 `testo.php`:
 
@@ -119,7 +152,3 @@ The password is `YourStrong!Passw0rd` for every server.
 The full reference is the agent skill [`skills/cycle-testing`](skills/cycle-testing/SKILL.md), which
 [`llm/skills`](https://github.com/roxblnfk/skills) installs into consumer projects together with Testo's own
 skills.
-
-## License
-
-MIT, see [LICENSE.md](LICENSE.md).
