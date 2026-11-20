@@ -26,6 +26,7 @@ final class ClassList implements ClassesInterface
      * Untyped: spiral/tokenizer 2.x declares `$target` without a type.
      *
      * @param object|string|null $target
+     * @return array<class-string, \ReflectionClass>
      */
     public function getClasses($target = null): array
     {
