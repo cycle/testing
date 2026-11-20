@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\Testing\Tests\Acceptance\Common;
+namespace Cycle\Testing\Tests\Feature\Common;
 
 use Cycle\Database\Exception\StatementException\ConnectionException;
 use Cycle\Testing\Database\Attribute\WrapDriver;

@@ -81,10 +81,10 @@
         "db:up": "docker compose -f resources/docker/compose.yaml up -d --wait",
         "psalm": "psalm",
         "test": "testo",
-        "test:mysql": "testo --suite=Acceptance/MySQL",
-        "test:postgres": "testo --suite=Acceptance/Postgres",
-        "test:sqlite": "testo --suite=Acceptance/SQLite",
-        "test:sqlserver": "testo --suite=Acceptance/SQLServer",
+        "test:mysql": "testo --suite=Feature/MySQL --suite=Acceptance/MySQL --suite=Regression/MySQL",
+        "test:postgres": "testo --suite=Feature/Postgres --suite=Acceptance/Postgres --suite=Regression/Postgres",
+        "test:sqlite": "testo --suite=Feature/SQLite --suite=Acceptance/SQLite --suite=Regression/SQLite",
+        "test:sqlserver": "testo --suite=Feature/SQLServer --suite=Acceptance/SQLServer --suite=Regression/SQLServer",
         "test:unit": "testo --suite=Unit"
     }
 }

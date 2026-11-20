@@ -12,22 +12,35 @@ use Cycle\Testing\ORM\OrmPlugin;
 
 return Config::forPackage('cycle/orm', root: __DIR__)       // src: ['src'], clover → runtime/clover.xml
     ->unit('tests/Unit')
-    ->acceptance(
-        'tests/Acceptance',                                  // Common/ + <Driver>/ beneath
+    ->feature(
+        'tests/Feature',                                     // Common/ + <Driver>/ beneath
         isolation: Isolation::DropTables,
         layout: Layout::prefixed(['secondary' => 'secondary_']),
         plugins: [new OrmPlugin()],
     )
+    ->acceptance('tests/Acceptance', plugins: [new OrmPlugin()])
+    ->regression('tests/Regression', plugins: [new OrmPlugin()])   // Issue<N>/ beneath
     ->build();
 ```
 
-`acceptance()` also takes `name` (suite prefix, default `Acceptance`), `drivers` (default `DB_DRIVERS`),
-`prepare`, `common` (default `Common`), `folders` (driver value => folder name) and `exclude`. A driver with
-neither folder gets no suite. `suite(SuiteConfig)` adds a hand-made suite; `plugins(...)` adds app-level
-plugins. Every suite gets `MockeryPlugin` when `testo/bridge-mockery` and Mockery are installed.
+| Method | Suites | Common part |
+|---|---|---|
+| `feature($path, …)` | `Feature/<Driver>` | `<path>/Common` |
+| `acceptance($path, …)` | `Acceptance/<Driver>` | `<path>/Common` |
+| `regression($path, …)` | `Regression/<Driver>` | `<path>` itself (`common: null`) |
+| `perDriver($name, $path, …)` | `<name>/<Driver>` | `<path>/Common` |
+
+All four take the same options: `drivers` (default `DB_DRIVERS`), `isolation`, `layout`, `prepare`,
+`plugins`, `common` (a folder name, or `null` for the path itself), `folders` (driver value => folder name)
+and `exclude`. A driver folder (`<path>/MySQL`) joins only its own suite, also under `common: null`. Missing
+folders are left out; a driver with no folder gets no suite. Each kind's options are independent: repeat
+`layout`, `plugins` and the rest on every call that needs them.
+
+`suite(SuiteConfig)` adds a hand-made suite; `plugins(...)` adds app-level plugins. Every suite gets
+`MockeryPlugin` when `testo/bridge-mockery` and Mockery are installed.
 
 Hand-written equivalent of one driver suite:
-`new SuiteConfig('Acceptance/MySQL', [...dirs], [new DatabasePlugin(Driver::MySQL, Isolation::DropTables, $layout, $prepare)])`.
+`new SuiteConfig('Feature/MySQL', [...dirs], [new DatabasePlugin(Driver::MySQL, Isolation::DropTables, $layout, $prepare)])`.
 
 ## Layouts
 
@@ -56,8 +69,8 @@ A variant of an in-memory SQLite driver is a separate, empty database.
 
 `SQLite`, `MySQL`, `Postgres`, `SQLServer` (values `sqlite`, `mysql`, `postgres`, `sqlserver`).
 `pick(default: …, <value>: …)`, `supports(Feature)`, `quote($id)`, `quotes()`, `config(?Env)`,
-`suiteName()`, `wrapDriverClass()`. `Feature`: `Returning`, `FullJoin`, `ForUpdate`, `Schemas`,
-`TransactionalDdl`.
+`suiteName($kind)`, `wrapDriverClass()`. The `Database\Feature` enum (unrelated to the suite kind):
+`Returning`, `FullJoin`, `ForUpdate`, `Schemas`, `TransactionalDdl`.
 
 ## Attributes (`Cycle\Testing\Database\Attribute\*`)
 

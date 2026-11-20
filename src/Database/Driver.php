@@ -24,7 +24,7 @@ use Cycle\Testing\Database\Mock\SQLServerWrapDriver;
  * A database driver a suite runs against.
  *
  * The value is the key used in env vars (`DB_<VALUE>_*`), `DB_DRIVERS` and {@see self::pick()}; the case
- * name is the folder name under the acceptance root and the suffix of the suite name.
+ * name is the driver folder name in a per-driver suite and the suffix of the suite name.
  */
 enum Driver: string
 {
@@ -47,11 +47,12 @@ enum Driver: string
     }
 
     /**
-     * @return non-empty-string For example `Acceptance/MySQL`.
+     * @param non-empty-string $kind Suite kind, e.g. `Feature`.
+     * @return non-empty-string For example `Feature/MySQL`.
      */
-    public function suiteName(string $prefix = 'Acceptance'): string
+    public function suiteName(string $kind): string
     {
-        return $prefix . '/' . $this->name;
+        return $kind . '/' . $this->name;
     }
 
     /**

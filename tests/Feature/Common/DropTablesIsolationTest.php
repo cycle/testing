@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\Testing\Tests\Acceptance\Common;
+namespace Cycle\Testing\Tests\Feature\Common;
 
 use Cycle\Testing\Database\DatabaseTestCase;
 use Testo\Assert;

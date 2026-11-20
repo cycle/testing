@@ -25,18 +25,26 @@ use Cycle\Testing\ORM\OrmPlugin;
 
 return Config::forPackage('cycle/orm', root: __DIR__)
     ->unit('tests/Unit')
-    ->acceptance('tests/Acceptance', layout: Layout::prefixed(['secondary' => 'secondary_']), plugins: [new OrmPlugin()])
+    ->feature('tests/Feature', layout: Layout::prefixed(['secondary' => 'secondary_']), plugins: [new OrmPlugin()])
+    ->regression('tests/Regression', plugins: [new OrmPlugin()])
     ->build();
 ```
 
-Test tree:
+Test tree — four kinds of tests, each a suite or one suite per driver:
 
 ```
 tests/
-  Unit/                    suite Unit
-  Acceptance/Common/       joins every Acceptance/<Driver> suite
-  Acceptance/SQLite/ MySQL/ Postgres/ SQLServer/   joins only its own driver's suite
+  Unit/                    suite Unit: no database, no IO
+  Feature/                 Feature/<Driver>: one feature against a real database (most tests)
+    Common/                  joins every driver's suite
+    SQLite/ MySQL/ Postgres/ SQLServer/   joins only its own driver's suite
+  Acceptance/              Acceptance/<Driver>: end-to-end scenarios through the public API; same layout
+  Regression/              Regression/<Driver>: reproductions of reported issues
+    Issue123/                test, entities and schema of one issue; runs on every driver
 ```
+
+`feature()`, `acceptance()` and `regression()` take the same options (drivers, isolation, layout, `prepare`,
+plugins, folders); `perDriver($name, $path, …)` builds any other kind.
 
 A test:
 
@@ -68,9 +76,9 @@ local variables, never in properties carried between tests.
 ```
 composer db:up                                            # all servers; or: composer db:up -- mysql
 vendor/bin/testo                                          # Unit + every driver suite; down servers are skipped
-vendor/bin/testo --suite=Acceptance/Postgres --filter=SelectTest
-DB_DRIVERS=sqlite vendor/bin/testo                        # register only the SQLite suite
-DB_REQUIRED=1 vendor/bin/testo --suite=Acceptance/MySQL   # CI: an unreachable server fails
+vendor/bin/testo --suite=Feature/Postgres --filter=SelectTest
+DB_DRIVERS=sqlite vendor/bin/testo                        # register only the SQLite suites
+DB_REQUIRED=1 vendor/bin/testo --suite=Feature/MySQL --suite=Regression/MySQL   # CI: an unreachable server fails
 composer db:down
 ```
 

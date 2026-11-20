@@ -1,7 +1,7 @@
 # ORM helpers
 
-Register `new OrmPlugin(...)` in the acceptance suite's `plugins`. It builds a **fresh ORM for every test**
-on the suite's `DatabaseManager` and checks the heap after each passed test.
+Register `new OrmPlugin(...)` in the `plugins` of every per-driver suite that runs ORM tests. It builds a
+**fresh ORM for every test** on the suite's `DatabaseManager` and checks the heap after each passed test.
 
 ```php
 new OrmPlugin(

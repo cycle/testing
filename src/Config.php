@@ -20,12 +20,13 @@ use Testo\Codecov\Report\CloverReport;
 use Testo\Common\PluginConfigurator;
 
 /**
- * Builds the `testo.php` config of a Cycle package: a unit suite, one acceptance suite per driver, coverage.
+ * Builds the `testo.php` config of a Cycle package: a unit suite, per-driver suites of each kind, coverage.
  *
  * ```
  * return Config::forPackage('cycle/orm', root: __DIR__)
  *     ->unit('tests/Unit')
- *     ->acceptance('tests/Acceptance', layout: Layout::prefixed(['secondary' => 'secondary_']))
+ *     ->feature('tests/Feature', layout: Layout::prefixed(['secondary' => 'secondary_']))
+ *     ->regression('tests/Regression')
  *     ->build();
  * ```
  *
@@ -82,39 +83,129 @@ final class Config
     }
 
     /**
-     * One suite per driver, named `<name>/<Driver>`, over `<root>/<common>` plus `<root>/<Driver>`.
+     * One feature at a time against a real database: suites `Feature/<Driver>`.
      *
-     * Missing folders are left out; a driver with neither folder gets no suite.
-     *
-     * @param non-empty-string $root
-     * @param non-empty-string $name
-     * @param list<Driver>|null $drivers Drivers to register; `DB_DRIVERS` by default.
-     * @param (callable(Database\DatabaseContext): void)|null $prepare Runs once per suite; see {@see DatabasePlugin}.
-     * @param iterable<PluginConfigurator> $plugins Added after the database plugin, e.g. `OrmPlugin`.
-     * @param array<value-of<Driver>, non-empty-string> $folders Driver value => folder, to rename a driver folder.
-     * @param list<non-empty-string> $exclude Paths under the root that hold no tests, e.g. fixtures.
+     * @param non-empty-string $path Holds `Common/` and the driver folders.
+     * @param list<Driver>|null $drivers
+     * @param (callable(Database\DatabaseContext): void)|null $prepare
+     * @param iterable<PluginConfigurator> $plugins
+     * @param non-empty-string|null $common
+     * @param array<value-of<Driver>, non-empty-string> $folders
+     * @param list<non-empty-string> $exclude
+     * @see self::perDriver() for the options.
      */
-    public function acceptance(
-        string $root,
-        string $name = 'Acceptance',
+    public function feature(
+        string $path,
         ?array $drivers = null,
         Isolation $isolation = Isolation::DropTables,
         ?Layout $layout = null,
         ?callable $prepare = null,
         iterable $plugins = [],
-        string $common = 'Common',
+        ?string $common = 'Common',
         array $folders = [],
         array $exclude = [],
     ): self {
-        $root = \rtrim($root, '/\\');
+        return $this->perDriver('Feature', $path, $drivers, $isolation, $layout, $prepare, $plugins, $common, $folders, $exclude);
+    }
+
+    /**
+     * End-to-end scenarios through the public API: suites `Acceptance/<Driver>`.
+     *
+     * @param non-empty-string $path Holds `Common/` and the driver folders.
+     * @param list<Driver>|null $drivers
+     * @param (callable(Database\DatabaseContext): void)|null $prepare
+     * @param iterable<PluginConfigurator> $plugins
+     * @param non-empty-string|null $common
+     * @param array<value-of<Driver>, non-empty-string> $folders
+     * @param list<non-empty-string> $exclude
+     * @see self::perDriver() for the options.
+     */
+    public function acceptance(
+        string $path,
+        ?array $drivers = null,
+        Isolation $isolation = Isolation::DropTables,
+        ?Layout $layout = null,
+        ?callable $prepare = null,
+        iterable $plugins = [],
+        ?string $common = 'Common',
+        array $folders = [],
+        array $exclude = [],
+    ): self {
+        return $this->perDriver('Acceptance', $path, $drivers, $isolation, $layout, $prepare, $plugins, $common, $folders, $exclude);
+    }
+
+    /**
+     * Reproductions of reported issues, one folder per issue (`Issue123/`): suites `Regression/<Driver>`.
+     *
+     * Every issue folder runs on every driver; a driver folder (`MySQL/`), if any, joins only its own suite.
+     *
+     * @param non-empty-string $path Holds the issue folders.
+     * @param list<Driver>|null $drivers
+     * @param (callable(Database\DatabaseContext): void)|null $prepare
+     * @param iterable<PluginConfigurator> $plugins
+     * @param non-empty-string|null $common
+     * @param array<value-of<Driver>, non-empty-string> $folders
+     * @param list<non-empty-string> $exclude
+     * @see self::perDriver() for the options.
+     */
+    public function regression(
+        string $path,
+        ?array $drivers = null,
+        Isolation $isolation = Isolation::DropTables,
+        ?Layout $layout = null,
+        ?callable $prepare = null,
+        iterable $plugins = [],
+        ?string $common = null,
+        array $folders = [],
+        array $exclude = [],
+    ): self {
+        return $this->perDriver('Regression', $path, $drivers, $isolation, $layout, $prepare, $plugins, $common, $folders, $exclude);
+    }
+
+    /**
+     * One suite per driver, named `<name>/<Driver>`, over `<path>/<common>` plus `<path>/<Driver>`.
+     *
+     * Missing folders are left out; a driver with neither folder gets no suite. With `common: null` the
+     * whole path is common, except the other drivers' folders.
+     *
+     * @param non-empty-string $name Suite kind, e.g. `Feature`.
+     * @param non-empty-string $path
+     * @param list<Driver>|null $drivers Drivers to register; `DB_DRIVERS` by default.
+     * @param (callable(Database\DatabaseContext): void)|null $prepare Runs once per suite; see {@see DatabasePlugin}.
+     * @param iterable<PluginConfigurator> $plugins Added after the database plugin, e.g. `OrmPlugin`.
+     * @param non-empty-string|null $common Folder joining every driver suite; `null` makes it the path itself.
+     * @param array<value-of<Driver>, non-empty-string> $folders Driver value => folder, to rename a driver folder.
+     * @param list<non-empty-string> $exclude Paths under the root that hold no tests, e.g. fixtures.
+     */
+    public function perDriver(
+        string $name,
+        string $path,
+        ?array $drivers = null,
+        Isolation $isolation = Isolation::DropTables,
+        ?Layout $layout = null,
+        ?callable $prepare = null,
+        iterable $plugins = [],
+        ?string $common = 'Common',
+        array $folders = [],
+        array $exclude = [],
+    ): self {
+        $path = \rtrim($path, '/\\');
         $plugins = self::list($plugins);
+        $folder = static fn(Driver $driver): string => $path . '/' . ($folders[$driver->value] ?? $driver->folder());
         $config = $this;
         foreach ($drivers ?? $this->env->drivers() as $driver) {
-            $include = $this->existing(["{$root}/{$common}", $root . '/' . ($folders[$driver->value] ?? $driver->folder())]);
+            if ($common === null) {
+                $include = $this->existing([$path]);
+                $others = \array_values(\array_filter(Driver::cases(), static fn(Driver $d): bool => $d !== $driver));
+                $skip = [...$exclude, ...\array_map($folder, $others)];
+            } else {
+                $include = $this->existing(["{$path}/{$common}", $folder($driver)]);
+                $skip = $exclude;
+            }
 
             $include === [] or $config = $config->suite(new SuiteConfig(
                 name: $driver->suiteName($name),
-                location: new FinderConfig(include: $include, exclude: $this->existing($exclude)),
+                location: new FinderConfig(include: $include, exclude: $this->existing($skip)),
                 plugins: [
                     ...$this->mockery(),
                     new DatabasePlugin($driver, $isolation, $layout, $prepare, $this->env),

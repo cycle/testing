@@ -45,7 +45,7 @@ final class DriverTest
 
     public function namesSuiteAndFolder(): void
     {
-        Assert::same(Driver::Postgres->suiteName(), 'Acceptance/Postgres');
+        Assert::same(Driver::Postgres->suiteName('Feature'), 'Feature/Postgres');
         Assert::same(Driver::SQLServer->folder(), 'SQLServer');
     }
 

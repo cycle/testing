@@ -1,6 +1,6 @@
 ---
 name: cycle-testing
-description: 'Tests of a Cycle ORM package (cycle/*) run on Testo through the cycle/testing harness. Use when writing, running or debugging such tests: anything under `tests/Unit` or `tests/Acceptance`, a per-driver failure (SQLite, MySQL, Postgres, SQLServer), `testo.php`, the test databases in docker, or porting a PHPUnit test.'
+description: 'Tests of a Cycle ORM package (cycle/*) run on Testo through the cycle/testing harness. Use when writing, running or debugging such tests: anything under `tests/Unit`, `tests/Feature`, `tests/Acceptance` or `tests/Regression`, deciding where a new test goes, a per-driver failure (SQLite, MySQL, Postgres, SQLServer), `testo.php`, the test databases in docker, or porting a PHPUnit test.'
 ---
 
 # Testing a Cycle package with cycle/testing
@@ -14,23 +14,41 @@ When a name here disagrees with `vendor/cycle/testing/src`, the source wins.
 
 ```
 tests/
-  Unit/                    suite "Unit": no database server
-  Acceptance/
-    Common/                joins every Acceptance/<Driver> suite
+  Unit/                    suite "Unit": no database server, no IO
+  Feature/                 suites "Feature/<Driver>"
+    Common/                joins every Feature/<Driver> suite
     SQLite/ MySQL/ Postgres/ SQLServer/   each joins only its own driver's suite
-  Fixtures/                entities, schemas, seeds — no tests
+  Acceptance/              suites "Acceptance/<Driver>", same layout as Feature/
+  Regression/              suites "Regression/<Driver>"
+    Issue123/              one folder per reported issue; every folder joins every driver suite
+  Fixtures/                entities, schemas, seeds shared across tests — no tests
 ```
 
-`testo.php` declares this with `Cycle\Testing\Config`; read it before adding a folder. Suites are
-`Unit`, `Acceptance/SQLite`, `Acceptance/MySQL`, `Acceptance/Postgres`, `Acceptance/SQLServer`.
+`testo.php` declares this with `Cycle\Testing\Config` (`unit()`, `feature()`, `acceptance()`,
+`regression()`); read it before adding a folder — a repo registers only the kinds it has, and some keep the
+tree under a package folder such as `tests/ORM/`.
+
+## Where a test goes
+
+Walk the list; the first match wins.
+
+1. It reproduces a user-reported issue → `Regression/Issue<N>/`, where `<N>` is the issue number.
+2. It needs no database server and no files → `Unit/` (StubDriver, `FakePDO` and in-memory SQLite are fine).
+3. It drives a whole scenario through the public API — configure, persist, query, check the outcome —
+   the way a user's application would → `Acceptance/Common/`.
+4. Otherwise it checks one feature against a real database → `Feature/Common/`. Most tests land here.
+
+Inside `Feature/` and `Acceptance/`, a test meaningful on one driver only goes to that driver's folder, with
+no attribute.
 
 ## Running
 
 ```
 vendor/bin/testo --suite=Unit
-vendor/bin/testo --suite=Acceptance/SQLite                     # needs no docker
+vendor/bin/testo --suite=Feature/SQLite                        # needs no docker
 composer db:up -- mysql                                       # shared compose, waits for healthchecks
-vendor/bin/testo --suite=Acceptance/MySQL --filter=SelectTest::limit
+vendor/bin/testo --suite=Feature/MySQL --filter=SelectTest::limit
+vendor/bin/testo --suite=Feature/MySQL --suite=Regression/MySQL   # --suite repeats; unknown names are ignored
 DB_DRIVERS=sqlite vendor/bin/testo                            # register only these driver suites
 ```
 
@@ -39,7 +57,7 @@ A driver whose server is down is checked once per suite and its tests are report
 `vendor/cycle/testing/resources/docker/.env`; any exported `DB_*` variable overrides them. Add `--json` when
 you parse the result.
 
-## Writing an acceptance test
+## Writing a database test
 
 ```php
 #[Test]
@@ -61,8 +79,6 @@ final class SelectTest extends DatabaseTestCase          // ORM tests: extends O
 }
 ```
 
-- Put it in `Acceptance/Common` unless it is meaningful on one driver only; then put it in that driver's
-  folder, with no attribute.
 - Per-driver differences, finest first: `$this->driver->pick(default: '…', sqlserver: '…')`,
   `$this->driver->supports(Feature::Returning)`, `#[OnlyDriver(...)]` / `#[ExceptDriver(...)]` on a method
   or class, a separate class in the driver folder plus `#[ExceptDriver]` on the common one. An excluded test
@@ -70,6 +86,26 @@ final class SelectTest extends DatabaseTestCase          // ORM tests: extends O
   subclasses that only set a driver are the pattern this harness replaces.
 - `{name}` in expected SQL becomes the driver's identifier quotes; whitespace is ignored.
 - The base class owns `schema()`, `db()`, `makeTable()` and friends; name your hooks differently.
+
+## Writing a regression test
+
+An issue folder is self-contained: the test class, its entities and its schema live inside it, in the
+namespace `…\Regression\Issue<N>`, so cases never share fixtures and one can be deleted whole.
+
+```
+Regression/Issue123/
+  IssueTest.php            #[Test] final class IssueTest extends OrmTestCase
+  Entity/User.php
+  schema.php               returns the schema array; load it with $this->loadSchema(__DIR__ . '/schema.php')
+```
+
+- Start from the closest existing `Issue*` folder or the repo's case template (orm and entity-behavior keep
+  one, with a `tests/generate-case.php` copier); rename the namespace to the new issue.
+- The test fails on the release that has the bug: assert the behaviour the issue asked for, and name the
+  methods after it.
+- A driver-only issue stays in its folder with `#[OnlyDriver(...)]` on the class.
+- Testo loads every PHP file of the folder at discovery, `schema.php` included: keep files free of side
+  effects and read them with `require` (as `loadSchema()` does), since a later `require_once` returns `true`.
 
 ## One instance per class
 
