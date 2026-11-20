@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\Testing\Tests\Unit;
 
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\Config\SQLiteDriverConfig;
 use Cycle\Database\Database;
+use Cycle\Database\DatabaseManager;
 use Cycle\Testing\Database\Mock\FakePDO;
 use Cycle\Testing\Database\Mock\StubDriver;
 use Testo\Assert;
@@ -34,6 +37,19 @@ final class StubDriverTest
 
         Expect::exception(\DomainException::class)->withMessage('boom');
         $db->select()->from('users')->fetchAll();
+    }
+
+    public function databaseManagerCreatesItFromItsConfig(): void
+    {
+        $dbal = new DatabaseManager(new DatabaseConfig([
+            'databases' => ['default' => ['connection' => 'stub']],
+            'connections' => ['stub' => new SQLiteDriverConfig(driver: StubDriver::class)],
+        ]));
+
+        $driver = $dbal->database()->getDriver();
+
+        Assert::instanceOf($driver, StubDriver::class);
+        Assert::same((int) $dbal->database()->query('SELECT 2 + 2')->fetchColumn(), 4);
     }
 
     public function withoutPdoUsesInMemorySqlite(): void
