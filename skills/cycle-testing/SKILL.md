@@ -93,15 +93,26 @@ final class SelectTest extends DatabaseTestCase          // ORM tests: extends O
 An issue folder is self-contained: the test class, its entities and its schema live inside it, in the
 namespace `…\Regression\Issue<N>`, so cases never share fixtures and one can be deleted whole.
 
+Generate the folder, then edit it; the generated case already passes:
+
 ```
-Regression/Issue123/
-  IssueTest.php            #[Test] final class IssueTest extends OrmTestCase
-  Entity/User.php
-  schema.php               returns the schema array; load it with $this->loadSchema(__DIR__ . '/schema.php')
+vendor/bin/cycle-testing new-case 123 --template=orm                       # tests/Regression/Issue123/
+vendor/bin/cycle-testing new-case 123 --template=orm --dir=tests/ORM/Regression
+vendor/bin/cycle-testing templates                                          # list the templates
 ```
 
-- Start from the closest existing `Issue*` folder or the repo's case template (orm and entity-behavior keep
-  one, with a `tests/generate-case.php` copier); rename the namespace to the new issue.
+| Template | Case |
+|---|---|
+| `database` | `DatabaseTestCase`, tables made with `makeTable()` (cycle/database) |
+| `orm` | `OrmTestCase`, entities plus a hand-written `schema.php` |
+| `orm-attributes` | entities mapped with cycle/annotated attributes, schema compiled by `SchemaCompiler` |
+| `orm-behaviors` | `orm-attributes` with cycle/entity-behavior behaviours and the event-driven command generator |
+
+The namespace comes from `autoload-dev` PSR-4 of `composer.json`; `--namespace=` overrides it, `--force`
+writes into an existing folder. Prefer the repo's composer script when it has one (e.g. `composer
+test:new-case -- 123`), which fixes the template and folder.
+
+- Replace the sample entities, tables and tests with the issue's reproduction; keep what the issue needs.
 - The test fails on the release that has the bug: assert the behaviour the issue asked for, and name the
   methods after it.
 - A driver-only issue stays in its folder with `#[OnlyDriver(...)]` on the class.

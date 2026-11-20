@@ -16,9 +16,11 @@
 /README.md       -export-ignore
 /CHANGELOG.md    -export-ignore
 
-# Autoloaded source code, the shared docker setup and the shipped agent skills.
+# Autoloaded source code, the case generator, its templates and the docker setup (resources/), the agent skills.
 /src             -export-ignore
 /src/**          -export-ignore
+/bin             -export-ignore
+/bin/**          -export-ignore
 /resources       -export-ignore
 /resources/**    -export-ignore
 /skills          -export-ignore
