@@ -126,12 +126,4 @@ final class Env
     {
         return $this->flag('DB_REQUIRED');
     }
-
-    /**
-     * `DB_DEBUG=1`: the query log is also echoed to stdout.
-     */
-    public function debug(): bool
-    {
-        return $this->flag('DB_DEBUG');
-    }
 }
