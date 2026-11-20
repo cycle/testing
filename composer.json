@@ -30,6 +30,7 @@
     "require": {
         "php": ">=8.2",
         "cycle/database": "^2.23",
+        "psr/container": "^1.1 || ^2",
         "psr/log": "^2 || ^3",
         "testo/testo": "^0.10.60"
     },
