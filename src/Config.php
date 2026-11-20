@@ -65,18 +65,18 @@ final class Config
     }
 
     /**
-     * A suite with no database.
+     * A suite with no database. Missing paths are left out; with none left, no suite is added.
      *
      * @param non-empty-string|list<non-empty-string>|FinderConfig $location
      * @param iterable<PluginConfigurator> $plugins
      */
     public function unit(string|array|FinderConfig $location, iterable $plugins = [], string $name = 'Unit'): self
     {
-        return $this->suite(new SuiteConfig(
+        $location instanceof FinderConfig or $location = $this->existing(\is_string($location) ? [$location] : $location);
+
+        return $location === [] ? $this : $this->suite(new SuiteConfig(
             name: $name,
-            location: $location instanceof FinderConfig
-                ? $location
-                : \array_map($this->path(...), \is_string($location) ? [$location] : $location),
+            location: $location,
             plugins: [...$this->mockery(), ...self::list($plugins)],
         ));
     }
@@ -110,14 +110,11 @@ final class Config
         $plugins = self::list($plugins);
         $config = $this;
         foreach ($drivers ?? $this->env->drivers() as $driver) {
-            $include = \array_values(\array_filter(
-                \array_map($this->path(...), ["{$root}/{$common}", $root . '/' . ($folders[$driver->value] ?? $driver->folder())]),
-                \is_dir(...),
-            ));
+            $include = $this->existing(["{$root}/{$common}", $root . '/' . ($folders[$driver->value] ?? $driver->folder())]);
 
             $include === [] or $config = $config->suite(new SuiteConfig(
                 name: $driver->suiteName($name),
-                location: new FinderConfig(include: $include, exclude: \array_map($this->path(...), $exclude)),
+                location: new FinderConfig(include: $include, exclude: $this->existing($exclude)),
                 plugins: [
                     ...$this->mockery(),
                     new DatabasePlugin($driver, $isolation, $layout, $prepare, $this->env),
@@ -156,11 +153,10 @@ final class Config
      */
     public function build(): ApplicationConfig
     {
-        $this->suites === [] and throw new \LogicException('No suites: add unit() or acceptance() with existing folders.');
-
         return new ApplicationConfig(
-            src: $this->src,
-            suites: $this->suites,
+            src: $this->src instanceof FinderConfig ? $this->src : $this->existing($this->src),
+            # Testo demands a suite; one that locates nothing makes a repo without test folders run empty.
+            suites: $this->suites ?: [new SuiteConfig(name: 'Unit', location: new FinderConfig())],
             plugins: [
                 new CodecovPlugin(
                     level: CoverageLevel::Line,
@@ -189,6 +185,17 @@ final class Config
     private static function list(iterable $plugins): array
     {
         return \is_array($plugins) ? \array_values($plugins) : \iterator_to_array($plugins, false);
+    }
+
+    /**
+     * Paths resolved against the root, missing ones left out: Testo rejects a location that does not exist.
+     *
+     * @param list<string> $paths
+     * @return list<non-empty-string>
+     */
+    private function existing(array $paths): array
+    {
+        return \array_values(\array_filter(\array_map($this->path(...), $paths), \file_exists(...)));
     }
 
     /**
