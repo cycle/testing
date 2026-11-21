@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/cycle/testing/compare/0.1.1...0.1.2) (2026-11-20)
+
+
+### Documentation
+
+* add the mutation testing badge ([38868d1](https://github.com/cycle/testing/commit/38868d1a5b3ac874a47d396bbc60b009f79b82d3))
+
 ## [0.1.1](https://github.com/cycle/testing/compare/0.1.0...0.1.1) (2026-11-20)
 
 
